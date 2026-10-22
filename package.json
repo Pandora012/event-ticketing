@@ -1,0 +1,53 @@
+{
+  "name": "eventify",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c yellow,cyan \"npm run dev -w @eventify/api\" \"npm run dev -w @eventify/web\"",
+    "build": "npm run build -w @eventify/web",
+    "start": "concurrently -k -n api,web \"npm run start -w @eventify/api\" \"npm run start -w @eventify/web\"",
+    "lint": "eslint .",
+    "test": "node scripts/test.js",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "node --env-file=.env prisma/seed.js",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "test:e2e": "node scripts/browser-test.js",
+    "db:test:create": "node scripts/create-test-db.js",
+    "setup:local": "node scripts/setup-local.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.3",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@babel/eslint-parser": "^7.28.5",
+    "@babel/preset-react": "^7.28.5",
+    "@eslint/js": "^9.39.0",
+    "@playwright/test": "^1.56.1",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "globals": "^16.5.0",
+    "prettier": "^3.9.10",
+    "prisma": "6.19.3",
+    "supertest": "^7.1.4"
+  },
+  "overrides": {
+    "@prisma/config": {
+      "deepmerge-ts": "8.0.2"
+    }
+  }
+}

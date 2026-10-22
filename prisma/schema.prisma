@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum Role {
+  USER
+  ORGANIZER
+}
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+}
+enum RegistrationStatus {
+  ACTIVE
+}
+model User {
+  id            String         @id @default(uuid()) @db.Uuid
+  name          String
+  email         String         @unique
+  passwordHash  String
+  role          Role           @default(USER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  events        Event[]
+  registrations Registration[]
+}
+model Event {
+  id            String         @id @default(uuid()) @db.Uuid
+  organizerId   String         @db.Uuid
+  organizer     User           @relation(fields: [organizerId], references: [id], onDelete: Restrict)
+  title         String
+  slug          String         @unique
+  description   String
+  category      String
+  location      String
+  startDate     DateTime
+  endDate       DateTime
+  capacity      Int
+  coverImage    String
+  status        EventStatus    @default(DRAFT)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  registrations Registration[]
+  @@index([status, startDate])
+  @@index([organizerId, startDate])
+  @@index([category])
+}
+model Registration {
+  id        String             @id @default(uuid()) @db.Uuid
+  eventId   String             @db.Uuid
+  userId    String             @db.Uuid
+  event     Event              @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  user      User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  status    RegistrationStatus @default(ACTIVE)
+  createdAt DateTime           @default(now())
+  ticket    Ticket?
+  @@unique([eventId, userId])
+  @@index([userId, createdAt])
+}
+model Ticket {
+  id             String       @id @default(uuid()) @db.Uuid
+  registrationId String       @unique @db.Uuid
+  registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Restrict)
+  referenceCode  String       @unique
+  tokenHash      String       @unique
+  checkedInAt    DateTime?
+  createdAt      DateTime     @default(now())
+}
